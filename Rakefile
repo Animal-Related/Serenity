@@ -118,7 +118,7 @@ namespace :grab do
 
 	    	puts result
 
-        File.write 'result.json', result
+        File.write 'result.json', result.to_json
 
 
      end

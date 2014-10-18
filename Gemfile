@@ -7,3 +7,4 @@ gem 'wordnet'
 gem 'lemmatizer'
 gem 'alchemy-api-rb', :require => 'alchemy_api'
 gem 'pry'
+
