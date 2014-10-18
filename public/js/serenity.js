@@ -1,8 +1,11 @@
-(function() {
-  var loadSounds = function loadSounds(notes, soundName) {
+(function(window) {
+  var serenity = {};
+
+  serenity.loadSounds = function loadSounds(notes, soundName) {
     // Takes:
     //  * an array of notes that represent the notes we want to download.
     //    i.e. "4-00" for C 4
+    //         5-1 for C#4
     //         "4-01" for C#4
     //         "5-01" for D 5
     //  * the name of the sound. audio file format = {soundname}-{num}.ogg
@@ -20,4 +23,7 @@
 
     return audios;
   };
-}());
+
+  // Export to window
+  window.serenity = serenity;
+}(window));
