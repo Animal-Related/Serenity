@@ -118,6 +118,8 @@ namespace :grab do
 
 	    	puts result
 
+        File.write 'result.json', result
+
 
      end
 
