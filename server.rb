@@ -3,7 +3,5 @@
 require 'sinatra'
 
 get '/' do
-  'Hello World!'
+  send_file 'public/index.html'
 end
-
-set :public_folder, File.dirname(__FILE__) + '/static'
