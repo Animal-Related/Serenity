@@ -50,6 +50,12 @@ namespace :grab do
 		 	# get lemma
 		   clean = ''
 		   w.split('').each {|letter| clean << letter if letter.upcase != letter.downcase}
+
+		   rhyme = JSON.parse(open("http://rhymebrain.com/talk?function=getRhymes&word=" + clean).read)
+						.first(3)
+						.find { |r| r['word'].downcase != clean.downcase }
+
+
 		  
 		  if not clean.empty?
 		    lemma = lem.lemma(clean.downcase)
@@ -94,8 +100,16 @@ namespace :grab do
 	   	  	evilness = 0
 	   	  end
 
+	   	  	audio_response = open('http://apifree.forvo.com/key/60fb68af7fed2704ab8967913fd97630/format/json/action/word-pronunciations/word/' + rhyme["word"] + '/language/en')
 
-		
+
+	   	  	begin
+	   	  		json = audio_response.read
+	   	  		JSON.parse(json)['items'].first['pathogg']
+	   	  		rhyme_url = JSON.parse(json)['items'].first['pathogg']
+	   		rescue NoMethodError
+	   	  		rhyme_url = nil
+	   		end
 
 			# # calculate evilness value of lemma 
 		 
@@ -107,11 +121,16 @@ namespace :grab do
 			# 	evilness = evilness_map[sentiment.to_sym]
 			# end 
 
+			
+
+
 		 	# save the parameters into a map  	
 		   	{word: word, length: length, index: index,
 		   		 #lemma: lemma ,
 		   		evilness: evilness,
-		   		audio: audio_urls}
+		   		audio: audio_urls,
+		   		rhyme_word: rhyme["word"],
+		   		rhyme: rhyme_url}
 
 	   end
 	    	result = [sentiment_score, words]
