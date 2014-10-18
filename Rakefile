@@ -2,6 +2,10 @@ require 'nokogiri'
 require 'wordnet'
 require 'open-uri'
 require 'lemmatizer'
+require './alchemyapi'
+
+alchemyapi = AlchemyAPI.new()
+lem = Lemmatizer.new
 
 
 namespace :grab do
@@ -29,8 +33,11 @@ namespace :grab do
 	   title = doc.css('div.article a').first.content
 	  
 	   words = title.split(" ")
-	   
-	   words.each do |w|   # word, length, position, evilness
+
+	   response = alchemyapi.sentiment("text", title)
+	   sentiment_score = response["docSentiment"]["score"]
+
+	   words.map! do |w|   # word, length, position, evilness
 	   	
 			# get the length and position 
 		   	word = w 
@@ -38,27 +45,43 @@ namespace :grab do
 		   	index = words.index(w)
 
 		 	# get lemma
-		   	clean = ''
-		   	w.split('').each {|letter| clean << letter if letter.upcase != letter.downcase}
-		   	
-		   	lem = Lemmatizer.new
-		   	lemma = lem.lemma(clean.downcase)
+		   clean = ''
+		   w.split('').each {|letter| clean << letter if letter.upcase != letter.downcase}
+		  
+		  if not clean.empty?
+		    lemma = lem.lemma(clean.downcase)
 
-			# calculate evilness value of lemma 
-		 	evilness = 0
-		 	evilness_map = {positive: 1, neutral: 0, negative: -1}
+		  	response = alchemyapi.sentiment("text", lemma)
 
-		 	# compare words to sentiment map
-			if sent_map.has_key?(lemma)
-				sentiment = sent_map[lemma]
-				evilness = evilness_map[sentiment.to_sym]
-			end 
+	   	  	evilness = response["docSentiment"]["score"]
+	   	  	evilness = 0 if evilness.nil?
+
+	   	  else
+	   	  	evilness = 0
+	   	  end
+
+		
+
+			# # calculate evilness value of lemma 
+		 
+		 # 	evilness_map = {positive: 1, neutral: 0, negative: -1}
+
+		 # 	# compare words to sentiment map
+			# if sent_map.has_key?(lemma)
+			# 	sentiment = sent_map[lemma]
+			# 	evilness = evilness_map[sentiment.to_sym]
+			# end 
 
 		 	# save the parameters into a map  	
-		   	word_map = {word: word, length: length, index: index, lemma: lemma ,evilness: evilness}
-		   	p word_map
+		   	{word: word, length: length, index: index,
+		   		 #lemma: lemma ,
+		   		evilness: evilness}
 
 	   end
+	    	result = [sentiment_score, words]
+
+	    	puts result
+
 
      end
 
