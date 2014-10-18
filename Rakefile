@@ -42,7 +42,7 @@ namespace :grab do
 		   	w.split('').each {|letter| clean << letter if letter.upcase != letter.downcase}
 		   	
 		   	lem = Lemmatizer.new
-		   	lemma = lem.lemma(clean)
+		   	lemma = lem.lemma(clean.downcase)
 
 			# calculate evilness value of lemma 
 		 	evilness = 0
