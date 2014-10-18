@@ -3,9 +3,13 @@ require 'wordnet'
 require 'open-uri'
 require 'lemmatizer'
 
+
 namespace :grab do
 
 	 task :mail do
+
+
+		lem = Lemmatizer.new
 
 		response = open('http://www.dailymail.co.uk/home/index.html')
 		doc = Nokogiri::HTML(response)
@@ -19,14 +23,19 @@ namespace :grab do
 	   # word, length, position, evilness
 
 	   words.each do |w|
-	   	word_array = []
 	   	
 	   	word = w 
 	   	length = w.length
 	   	index = words.index(w)
 
-	   	word_array = [word,length,index]
-	   	p word_array
+	   	clean = ''
+	   	w.split('').each {|letter| clean << letter if letter.upcase != letter.downcase}
+	   	p clean
+
+	   	lemma = lem.lemma(clean)
+
+	   	word_map = {word: word, length: length, index: index, lemma: lemma}
+	   	p word_map
 
 	   end
 
