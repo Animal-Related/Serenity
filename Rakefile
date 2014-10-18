@@ -3,6 +3,9 @@ require 'wordnet'
 require 'open-uri'
 require 'lemmatizer'
 require './alchemyapi'
+require 'json'
+require 'pry'
+
 
 alchemyapi = AlchemyAPI.new()
 lem = Lemmatizer.new
@@ -56,9 +59,41 @@ namespace :grab do
 	   	  	evilness = response["docSentiment"]["score"]
 	   	  	evilness = 0 if evilness.nil?
 
+	   	  	how_evil = evilness.to_f
+
+	   	  	if how_evil < -0.2
+	   	  		#http://apifree.forvo.com/action/word-pronunciations/format/json/word/rapist/language/en/key/60fb68af7fed2704ab8967913fd97630/
+	   	  		audio_response = open('http://apifree.forvo.com/key/60fb68af7fed2704ab8967913fd97630/format/json/action/word-pronunciations/word/' + clean + '/language/en')
+	  
+	   	  		json_audio = JSON.parse(audio_response.read)
+	   	  		# binding.pry
+	   	  		
+	   	  		audio_urls = []
+
+	   	  		json_audio['items'].each do |item|
+	   	  			audio_urls << item['pathogg'] if item["sex"] == 'm'
+	   	  		end
+
+	   	  	elsif how_evil > 0.2
+	   	  		audio_response = open('http://apifree.forvo.com/key/60fb68af7fed2704ab8967913fd97630/format/json/action/word-pronunciations/word/' + clean + '/language/en')
+	  
+	   	  		json_audio = JSON.parse(audio_response.read)
+	   	  		# binding.pry
+	   	  		
+	   	  		audio_urls = []
+
+	   	  		json_audio['items'].each do |item|
+	   	  			audio_urls << item['pathogg'] if item["sex"] == 'f'
+	   	  		end
+
+	   	  		
+	   	  	end
+
+
 	   	  else
 	   	  	evilness = 0
 	   	  end
+
 
 		
 
@@ -75,7 +110,8 @@ namespace :grab do
 		 	# save the parameters into a map  	
 		   	{word: word, length: length, index: index,
 		   		 #lemma: lemma ,
-		   		evilness: evilness}
+		   		evilness: evilness,
+		   		audio: audio_urls}
 
 	   end
 	    	result = [sentiment_score, words]
