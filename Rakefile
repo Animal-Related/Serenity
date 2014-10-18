@@ -7,35 +7,56 @@ require 'lemmatizer'
 namespace :grab do
 
 	 task :mail do
+	 
+	 #create sentiment map
+
+	 	file = open('subjectivity_lexicon_opinion_finder.txt') #open subjectivity file 
+
+	 	sent_map = {}
+	 	IO.foreach(file) do |line|
+
+	 		items = line.split(" ")
+	 		sentiment = items[-1]
+	 		dict_word = items[1]
+	 		sent_map[dict_word] = sentiment
+	 	end
 
 
-		lem = Lemmatizer.new
-
-		response = open('http://www.dailymail.co.uk/home/index.html')
-		doc = Nokogiri::HTML(response)
+		# scrape the main title of the day / hour
+	   response = open('http://www.dailymail.co.uk/home/index.html')
+	   doc = Nokogiri::HTML(response)
 
 	   title = doc.css('div.article a').first.content
 	  
 	   words = title.split(" ")
-
-	   all_title_words = []
 	   
-	   # word, length, position, evilness
-
-	   words.each do |w|
+	   words.each do |w|   # word, length, position, evilness
 	   	
-	   	word = w 
-	   	length = w.length
-	   	index = words.index(w)
+			# get the length and position 
+		   	word = w 
+		   	length = w.length
+		   	index = words.index(w)
 
-	   	clean = ''
-	   	w.split('').each {|letter| clean << letter if letter.upcase != letter.downcase}
-	   	p clean
+		 	# get lemma
+		   	clean = ''
+		   	w.split('').each {|letter| clean << letter if letter.upcase != letter.downcase}
+		   	
+		   	lem = Lemmatizer.new
+		   	lemma = lem.lemma(clean)
 
-	   	lemma = lem.lemma(clean)
+			# calculate evilness value of lemma 
+		 	evilness = 0
+		 	evilness_map = {positive: 1, neutral: 0, negative: -1}
 
-	   	word_map = {word: word, length: length, index: index, lemma: lemma}
-	   	p word_map
+		 	# compare words to sentiment map
+			if sent_map.has_key?(lemma)
+				sentiment = sent_map[lemma]
+				evilness = evilness_map[sentiment.to_sym]
+			end 
+
+		 	# save the parameters into a map  	
+		   	word_map = {word: word, length: length, index: index, lemma: lemma ,evilness: evilness}
+		   	p word_map
 
 	   end
 
