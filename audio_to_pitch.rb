@@ -5,11 +5,62 @@ require 'json'
 require 'open3'
 
 
-our_array = JSON.parse(File.read("result.json"))
-sentiment = our_array[0]
-objects = our_array[1]
+def initialize
+	make_notes (0)
+end
 
-def notes sentiment
+def play_background (array)
+	len = array.length * 4
+
+	1.upto(len) do 
+		Thread.new do
+			play accompanying_note_1
+		end
+		
+		sleep 0.2
+
+		Thread.new do
+			play accompanying_note_2
+		end
+	end
+
+
+end
+
+
+def play_from_array (array)
+
+	array.each do |sound|
+
+		word = sound[1]
+		length = sound[2]
+		evilness = sound[-2]
+		rhyme = sound[-1] if sound[-1]
+
+		Thread.new do
+			 play word
+		end
+
+		sleep 0.6
+
+		Thread.new do
+			 play rhyme if rhyme
+		end
+
+		sleep 0.2
+	end
+
+end
+
+def make_notes (sentiment)
+
+	low_note_1 = "public/sounds/pianoteq-vibraphone-3-00.ogg"
+	low_note_2 = "public/sounds/pianoteq-vibraphone-3-00.ogg"
+
+	accompanying_note_1 = "public/sounds/pianoteq-vibraphone-6-06.ogg"
+	accompanying_note_2  = "public/sounds/pianoteq-vibraphone-6-03.ogg"
+
+
 	if sentiment < 0.5
 		tempo = ''
 		time_sig = ''
@@ -17,123 +68,106 @@ def notes sentiment
 		rhythm_notes = []
 
 	end
-
 end
 
 
 
-notes_array = []
 
-objects.each do |obj|
 
-	word = obj["word"]
+
+def clean_word (s)
 	clean = ''
-	word.split('').each {|letter| clean << letter if letter.upcase != letter.downcase}
-
-	name = clean.downcase + '.ogg'
-
-	if obj["audio"]
-
-		if obj["audio"].length > 0
-
-	 		url = obj["audio"].first
-
-		else
-
-			url = nil
-		end
-
-		if url
-			word = obj["word"]
-			clean = ''
-		   word.split('').each {|letter| clean << letter if letter.upcase != letter.downcase}
-
-			name = clean.downcase + '.ogg'
-			File.open(name, "wb") do |saved_file| # save tempfile to name file
-			 	open(url, "rb") do |read_file| # the "open" is provided by open-uri
-			    	saved_file.write(read_file.read)
-			  	end
-			end
-
-			rhymename = nil
-
-			if obj["rhyme"]
-				rhymename = obj["rhyme_word"] + '.ogg'
-				rhyme_url = obj["rhyme"]
-
-				File.open(rhymename, "wb") do |saved_file| # save tempfile to name file
-				 	open(rhyme_url, "rb") do |read_file| # the "open" is provided by open-uri
-				    	saved_file.write(read_file.read)
-				  	end
-				end
-			end
-
-
-		  	# system "play #{name} norm reverse vad reverse"
-
-		 else
-		 	name = "public/sounds/pianoteq-vibraphone-3-00.ogg"
-		 	# system "play #{name} norm reverse vad reverse"
-
-		end
-
-		
-	else
-		name = "public/sounds/pianoteq-vibraphone-4-00.ogg"
-		# system "play #{name} norm reverse vad reverse"
-	end
-
-	notes_array << [clean,name,obj["length"],obj["evilness"], rhymename]
+	s.split('').each {|letter| clean << letter if letter.upcase != letter.downcase}
 
 end
 
-p notes_array
+def to_ogg_filename (s) 
+	 s.downcase + '.ogg'
+end
+
+def save_tempfile (filename,url)
+
+	File.open(filename, "wb") do |saved_file| # save tempfile to name file
+		open(url, "rb") do |read_file| # the "open" is provided by open-uri
+			saved_file.write(read_file.read)
+	  	end
+	end
+end
+
+def pull_audio (location_array)
+	if location_array.length > 0
+	 	url = location_array.first
+	else
+		url = nil
+	end
+end
 
 def play(file)
 	`play #{file} >/dev/null 2>&1`
 end
 
+#data = JSON.parse(File.read("result.json"))
 
+def create_from_data (json_file,with_saving)
 
+	data = JSON.parse(File.read(json_file))
+	sentiment = data[0]
+	word_objects = data[1]
 
-len = notes_array.length * 4
+	notes_array = []
 
-high_note = "public/sounds/pianoteq-vibraphone-6-06.ogg"
-low_note = "public/sounds/pianoteq-vibraphone-6-03.ogg"
+	word_objects.each do |obj|
 
-Thread.new do
-	len.times do 
-		Thread.new do
-			 play high_note
+		clean = clean_word (obj["word"])
+		name = to_ogg_filename (clean)
+		url = pull_audio_url (obj["audio"])
+
+		if obj["audio"]
+			if url
+				save_tempfile (name,url) if with_saving?
+				rhymename = nil
+
+				if obj["rhyme"]
+					rhymename = to_ogg_filename (obj["rhyme_word"])
+					rhyme_url = obj["rhyme"]
+
+					save_tempfile (rhymename,rhyme_url) if with_saving
+				end
+
+			  	# system "play #{name} norm reverse vad reverse"
+			else
+			 	name = low_note_1
+			end
+
+			if with_saving
+
+		else
+			name = low_note_2
+			# system "play #{name} norm reverse vad reverse"
 		end
-	sleep 0.2
 
-	Thread.new do
-			 play low_note
-		end
+		notes_array << [clean,name,obj["length"],obj["evilness"], rhymename]
 	end
+
+	p notes_array
+
+	play_background (notes_array)
+	play_from_array (notes_array)
+
 end
 
-notes_array.each do |sound|
 
-	word = sound[1]
-	length = sound[2]
-	evilness = sound[-2]
-	rhyme = sound[-1] if sound[-1]
 
-	Thread.new do
-		 play word
-	end
 
-	sleep 0.6
 
-	Thread.new do
-		 play rhyme if rhyme
-	end
 
-	sleep 0.2
 
-end
+
+
+
+
+
+
 
 # binding.pry
 
@@ -142,5 +176,10 @@ end
 
 
 
+# run with 
+# ruby audio_to_pitch.rb ("result-mail.json",true) if you want to save the filenames too
+# or
+# ruby audio_to_pitch.rb ("result-mail.json",false) if you dont
+# ruby -r "./audio_to_pitch.rb" -e "create_from_data "result-mail.json",false"
 
 
