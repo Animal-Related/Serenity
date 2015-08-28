@@ -5,12 +5,30 @@ require 'json'
 require 'open3'
 
 
-def initialize
-	make_notes (0)
+def make_notes (sentiment)
+
+	low_note_1 = "public/sounds/pianoteq-vibraphone-3-00.ogg"
+	low_note_2 = "public/sounds/pianoteq-vibraphone-3-00.ogg"
+
+	accompanying_note_1 = "public/sounds/pianoteq-vibraphone-6-06.ogg"
+	accompanying_note_2  = "public/sounds/pianoteq-vibraphone-6-03.ogg"
+
+
+	if sentiment < 0.5
+		tempo = ''
+		time_sig = ''
+		genre = ''
+		rhythm_notes = []
+
+	end
 end
+
+
+
 
 def play_background (array)
 	len = array.length * 4
+	p len
 
 	1.upto(len) do 
 		Thread.new do
@@ -52,23 +70,7 @@ def play_from_array (array)
 
 end
 
-def make_notes (sentiment)
 
-	low_note_1 = "public/sounds/pianoteq-vibraphone-3-00.ogg"
-	low_note_2 = "public/sounds/pianoteq-vibraphone-3-00.ogg"
-
-	accompanying_note_1 = "public/sounds/pianoteq-vibraphone-6-06.ogg"
-	accompanying_note_2  = "public/sounds/pianoteq-vibraphone-6-03.ogg"
-
-
-	if sentiment < 0.5
-		tempo = ''
-		time_sig = ''
-		genre = ''
-		rhythm_notes = []
-
-	end
-end
 
 
 
@@ -82,7 +84,7 @@ def clean_word (s)
 end
 
 def to_ogg_filename (s) 
-	 s.downcase + '.ogg'
+	 s.join("").downcase + '.ogg'
 end
 
 def save_tempfile (filename,url)
@@ -94,7 +96,7 @@ def save_tempfile (filename,url)
 	end
 end
 
-def pull_audio (location_array)
+def pull_audio_url (location_array)
 	if location_array.length > 0
 	 	url = location_array.first
 	else
@@ -105,6 +107,8 @@ end
 def play(file)
 	`play #{file} >/dev/null 2>&1`
 end
+
+
 
 #data = JSON.parse(File.read("result.json"))
 
@@ -124,14 +128,14 @@ def create_from_data (json_file,with_saving)
 
 		if obj["audio"]
 			if url
-				save_tempfile (name,url) if with_saving?
+				# save_tempfile (name,url) if with_saving
 				rhymename = nil
 
 				if obj["rhyme"]
 					rhymename = to_ogg_filename (obj["rhyme_word"])
 					rhyme_url = obj["rhyme"]
 
-					save_tempfile (rhymename,rhyme_url) if with_saving
+					# save_tempfile (rhymename,rhyme_url) if with_saving
 				end
 
 			  	# system "play #{name} norm reverse vad reverse"
@@ -139,7 +143,7 @@ def create_from_data (json_file,with_saving)
 			 	name = low_note_1
 			end
 
-			if with_saving
+			
 
 		else
 			name = low_note_2
@@ -156,6 +160,9 @@ def create_from_data (json_file,with_saving)
 
 end
 
+
+make_notes 0
+create_from_data("result-mail.json",false)
 
 
 
@@ -180,6 +187,6 @@ end
 # ruby audio_to_pitch.rb ("result-mail.json",true) if you want to save the filenames too
 # or
 # ruby audio_to_pitch.rb ("result-mail.json",false) if you dont
-# ruby -r "./audio_to_pitch.rb" -e "create_from_data "result-mail.json",false"
+# ruby -r "./audio_to_pitch.rb" -e "create_from_data 'result-mail.json',false"
 
 

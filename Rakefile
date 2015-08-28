@@ -110,7 +110,7 @@ namespace :grab do
 
 	   	  		json = audio_response.read
 	   	  		foo = JSON.parse(json)
-	   	  		binding.pry
+	   	  		# binding.pry
 	   	  	
 	   	  		#['items'].first
 	   	  		#['pathogg']
@@ -147,7 +147,7 @@ namespace :grab do
 
 	    	puts result
 
-        File.write 'result-mail.json', result.to_json
+        File.write 'result-mail_222.json', result.to_json
 
 
      end
@@ -247,7 +247,7 @@ namespace :grab do
 
 	   	  		json = audio_response.read
 	   	  		foo = JSON.parse(json)
-	   	  		binding.pry
+	   	  		# binding.pry
 	   	  	
 	   	  		#['items'].first
 	   	  		#['pathogg']
@@ -284,7 +284,7 @@ namespace :grab do
 
 	    	puts result
 
-        File.write 'result-mail2.json', result.to_json
+        File.write 'result-mail_2xxx.json', result.to_json
 
 
      end
