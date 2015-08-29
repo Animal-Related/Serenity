@@ -20,7 +20,11 @@
             {name:'telegraph',
             url:'http://www.telegraph.co.uk/news/worldnews/rss'},
             {name:'independent',
-                        url:'http://rss.feedsportal.com/c/266/f/3503/index.rss'}
+            url:'http://rss.feedsportal.com/c/266/f/3503/index.rss'},
+            {name:'times',
+            url:"http://www.thetimes.co.uk/tto/news/rss"},
+            {name:'express',
+            url:"http://feeds.feedburner.com/daily-express-news-showbiz"}
               ];
 
     //
@@ -29,6 +33,10 @@
 
 
  // 'where url="http://www.dailymail.co.uk/news/index.rss" ' +
+
+     String.prototype.capitalize = function() {
+        return this.charAt(0).toUpperCase() + this.slice(1);
+    }
 
     function queryHeadline(source, id) {
         var request = new XMLHttpRequest(),
@@ -70,6 +78,7 @@
                     hEl.innerHTML =
                           '<span>'+ headline.split('').join('</span><span>') + '</span>';
                     pEl.innerHTML = article.score;
+                    h3El.innerHTML = "Today's brainfuck, brought to you by The " + id.capitalize();
                     if (article.rude){h2El.style.color = "blue";}
                     console.log(article);
                 };
@@ -94,10 +103,13 @@
 
                     h2El = document.createElement('h2');
                     h2El.innerHTML = "Misery rating";
+
+                    h3El = document.createElement('h3');
+                   
                     pEl = document.createElement('p');
 
                     aEl = document.createElement('a');
-                    aEl.innerHTML = 'Find more misery here...';
+                    aEl.innerHTML = 'Next miserable headline...';
                     aEl.id = "link";
                     aEl.className = 'hidden';
 
@@ -111,8 +123,7 @@
                       replaceContent(index);
                     };
 
-                    aEl2 = document.createElement('a');
-                    aEl2.innerHTML = 'Change source...';
+                    aEl2 = document.getElementById('changesource');
 
                     aEl2.onclick=function(){
 
@@ -129,11 +140,11 @@
 
                     body = document.querySelector('article');
                     body.innerHTML = '';
+                    body.appendChild(h3El);
                     body.appendChild(h2El);
                     body.appendChild(pEl);
                     body.appendChild(hEl);
                     body.appendChild(aEl);
-                    body.appendChild(aEl2);
                 }; 
 
                 // Race condition. Without the timeout we remove the class before the

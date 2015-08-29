@@ -1,6 +1,6 @@
 * {
   color: #333;
-  font-family: Arial,Helvetica,sans-serif;
+  font-family: 'Dosis',Helvetica,sans-serif;
   opacity: 1;
   transition: color 6s ease, opacity 4s ease;
 }
@@ -31,8 +31,13 @@ nav div {
 }
 
 nav p {
-  margin-left: 1px;
+  margin-left: 5px;
   font-size: 14px;
+  min-width: 20px;
+}
+
+nav a {
+  font-style: italic;
 }
 
 section {
@@ -60,6 +65,7 @@ h2 {
 p {
   display: inline-block;
   font-size: 22.6px;
+  margin-left: 5px;
 }
 
 a {
