@@ -14,16 +14,14 @@ body {
   bottom: 0;
   display: table;
   height: 100%;
-  position: absolute;
   top: 0;
   width: 100%;
 }
 
 nav {
-  line-height: 2em;
- 
-  display: inline;
-  vertical-align: middle;
+  width: 10%;
+  float: left;
+
 }
 
 nav div {
@@ -34,39 +32,62 @@ nav p {
   margin-left: 5px;
   font-size: 14px;
   min-width: 20px;
+  opacity: 0.75;
 }
 
 nav a {
-  font-style: italic;
+  line-height: 1em;
 }
 
-#headerdiv {
-  width: 90%;
-  top: 0;
-  z-index: 5;
-  position: fixed;
+nav div#changesource{
+  font-size: 50px;
+  text-align: center;
+  margin-left: 5px;
 }
 
-#emojis {
-  font-size: 30px;
+nav a#link {
+  font-size: 50px;
+  text-align: center;
+  margin-left: 5px;
+}
+
+nav a:hover {
+  color: gold;
 }
 
 section {
-  display: table-cell;
+  width: 80%;
+  float: left;
+  margin-left: 5%;
   text-align: center;
-  vertical-align: middle;
-  clear: both;
+
 }
 
+#headerdiv {
+  min-width: 300px;
+  height: 200px;
+
+}
+
+p#emojis {
+  font-size: 100px;
+  display: block;
+  line-height: 100px;
+  margin: 0;
+}
+
+
+
+
 article {
-  padding-top: 10%;
+  width: 80%;
   display: inline-block;
-  max-width: 60em;
 }
 
 h1 {
   display: inline-block;
   font-size: 66.6px;
+  margin: 1em 0 0 0;
 }
 
 h2 {
@@ -82,14 +103,27 @@ p {
 
 a {
   display: block;
-  text-align: right;
   text-decoration: none;
+}
+
+
+
+p#misery_score {
+  font-size: 30px;
+  font-weight: 700;
+  margin-left: 10px;
 }
 
 .highlight {
   color: #d83;
   transition: color 2s ease;
 }
+
+.active {
+  font-weight: 700;
+  opacity: 1;
+}
+
 
 .hidden {
   opacity: 0;
