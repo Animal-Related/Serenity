@@ -11,6 +11,8 @@
         sourceIndex=0;
         var sentimental = require('sentimental');
         var wordfilter = require('wordfilter');
+        var emoji = require('node-emoji').emoji;
+
         var sources = [
             {name:'guardian',
             url:"http://www.theguardian.com/uk/rss"},
@@ -25,6 +27,13 @@
             {name:'express',
             url:"http://feeds.feedburner.com/daily-express-news-showbiz"}
               ];
+        var emotions = {
+          'very negative': emoji.rage,
+          'negative': emoji.angry,
+          'neutral': emoji.relaxed,
+          'positive': emoji.smile,
+          'very positive' : emoji.triumph
+        }
 
     //
     // Get the Daily Mail front page headline + description from RSS
@@ -36,6 +45,23 @@
      String.prototype.capitalize = function() {
         return this.charAt(0).toUpperCase() + this.slice(1);
     }
+
+   Array.prototype.array_to_histogram = function() {
+      var hist = {};
+      for (var k=0;k<this.length;k++) {
+        var word = this[k];
+        hist[word] ? hist[word]++ : hist[word]=1;
+      } 
+      return hist;
+   }
+
+   Array.prototype.flatten_arrays = function(){
+    return [].concat.apply([], this);
+   }
+
+   Array.prototype.toHistogram = function(){
+    return this.flatten_arrays().array_to_histogram();
+   }
 
     function queryHeadline(source, id) {
         var request = new XMLHttpRequest(),
@@ -54,6 +80,7 @@
                 articles = JSON.parse(request.responseText).query.results.item;
                 no_of_articles = articles.length;
                 var arrayOfDMObjects = [];
+               
 
                 for (var i = 0; i<no_of_articles; i++) {
 
@@ -66,10 +93,12 @@
                     };
 
                     arrayOfDMObjects.push(obj);
+                    
                 }
 
                 createArticle(0);
                 getTodaysScore();
+                // getTopCategories(); // only Guardian RSS has categories !
 
                 function replaceContent(i) {
                     article = arrayOfDMObjects[i];
@@ -77,9 +106,11 @@
                     hEl.innerHTML =
                           '<span>'+ headline.split('').join('</span><span>') + '</span>';
                     pEl.innerHTML = article.score;
+
+                    getEmotionsfromScore(article.score);
+
                     h3El.innerHTML = "Today's brainfuck, brought to you by The " + id.capitalize();
                     if (article.rude){h2El.style.color = "blue";}
-                    console.log(article);
                 };
 
                 function getTodaysScore() {
@@ -90,7 +121,51 @@
                   }
 
                   document.getElementById(id).innerHTML = score;
+                }
 
+                function getTopCategories(){
+
+                   var sourceCategories = [];
+
+                   for (var i = 0; i<article.length;i++) {
+
+                     categories = articles[i].category;
+                     var storyCategories = [];
+
+                      for (var j = 0; j<categories.length;j++) {
+                        storyCategories.push(categories[j]['content']);
+                      }
+
+                      sourceCategories.push(storyCategories);
+                    }
+
+                  var sourceHistogram = sourceCategories.toHistogram();
+                  keysSorted = Object.keys(sourceHistogram).sort(function(a,b){return sourceHistogram[b]-sourceHistogram[a]});
+                  top10 = keysSorted.slice(0,10);
+                  console.log(top10);
+                }
+
+                function getEmotionsfromScore(score){
+                  var em;
+
+                    switch (true) {
+                     case (score<=-5): em='very negative';
+                     break;
+                     
+                     case (score<=-2): em='negative';
+                     break;
+
+                      case (score<0): em='neutral';
+                     break;
+                     
+                     case (score==0): em='positive';
+                     break;
+
+                     case (score>0): em='very positive';
+                     break;
+
+                  }
+                  emojiEl.innerHTML = emotions[em];
                 }
 
                 function createArticle(index) {
@@ -105,6 +180,8 @@
 
                     h3El = document.createElement('h3');
                    
+                    emojiEl = document.createElement('p');
+                    emojiEl.id="emojis";
                     pEl = document.createElement('p');
 
                     aEl = document.createElement('a');
@@ -139,11 +216,15 @@
 
                     body = document.querySelector('article');
                     body.innerHTML = '';
-                    body.appendChild(h3El);
-                    body.appendChild(h2El);
-                    body.appendChild(pEl);
+                    headerdiv = document.getElementById('headerdiv');
+                    headerdiv.innerHTML = '';
+                    headerdiv.appendChild(h3El);
+                    headerdiv.appendChild(h2El);
+                    headerdiv.appendChild(pEl);
+                    headerdiv.appendChild(emojiEl);
+                    headerdiv.appendChild(aEl);
                     body.appendChild(hEl);
-                    body.appendChild(aEl);
+                    
                 }; 
 
                 // Race condition. Without the timeout we remove the class before the

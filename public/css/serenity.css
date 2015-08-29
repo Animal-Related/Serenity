@@ -40,6 +40,17 @@ nav a {
   font-style: italic;
 }
 
+#headerdiv {
+  width: 90%;
+  top: 0;
+  z-index: 5;
+  position: fixed;
+}
+
+#emojis {
+  font-size: 30px;
+}
+
 section {
   display: table-cell;
   text-align: center;
@@ -48,6 +59,7 @@ section {
 }
 
 article {
+  padding-top: 10%;
   display: inline-block;
   max-width: 60em;
 }
