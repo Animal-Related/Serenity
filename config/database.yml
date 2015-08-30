@@ -1,0 +1,15 @@
+development:
+  adapter: postgresql
+  encoding: unicode
+  database: db/serenity_development
+  pool: 5
+  username: lemez
+  password:
+
+test:
+  adapter: postgresql
+  encoding: unicode
+  database: db/serenity_test
+  pool: 5
+  username: lemez
+  password:

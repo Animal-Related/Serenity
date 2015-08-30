@@ -1,7 +1,7 @@
 // Command after EACH change in JS file: sudo browserify public/js/serenity2.js -o public/js/bundle.js
 
 
-(function() {
+$(function() {
     var bpm = 80,
         beatMs = 60000 / bpm,
         headline,
@@ -23,6 +23,9 @@
         var wordfilter = require('wordfilter');
         var emoji = require('node-emoji').emoji;
         var _ = require('underscore');
+        var chartkick = require('./chartkick.js');
+        // var wordNet = require('wordnet-magic');
+        // var wn = wordNet();
 
         var sources = [ 
             {name:'Mail',
@@ -57,6 +60,23 @@
    }
    Array.prototype.flatten_arrays = function(){return [].concat.apply([], this);}
    Array.prototype.toHistogram = function(){return this.flatten_arrays().array_to_histogram();}
+  
+  // String.prototype.lemmatize = function() {
+  //   var newLines = [];
+  //   var strings = this.split(" ");
+  //   _.each(strings,function(e){
+  //     newLines.push(getLemma(e));
+  //   });
+  //   return newLines.join(" ");
+  // }
+
+     // function getLemma(word){
+    //   wn.morphy(word, "n" , function(err, data){
+    //     return data['lemma'];
+    //   })
+    // }
+
+
 
    function addPapers(){
        var papers = _.pluck(sources, 'name');
@@ -67,6 +87,7 @@
         });   
     }
 
+ 
    function setUp(myId){
       hEl = document.createElement('h1');
       hEl.className = 'hidden';
@@ -98,8 +119,8 @@
     aEl2 = document.createElement('div');
     aEl2.innerHTML='~>';
     aEl2.id='changesource';
-    aEl2.onclick=function(){
 
+    aEl2.onclick=function(){
       sourceIndex++;
       if (articleIndex == sources.length) { sourceIndex=0;}
       index = sourceIndex;
@@ -107,7 +128,6 @@
       ele = document.getElementById(newId);
       ele.classList.remove('active');
       ele.nextSibling.classList.remove('active');
-      console.log(newId);
 
       getContent();
     };
@@ -142,9 +162,20 @@
 
                 headline = allstories[i].title.trim();
 
+                score = sentimental.analyze(headline)['score'];
+
+                // newscore = headline.lemmatize();
+                // var wn = wordNet();
+                // console.log(wn instanceof wordNet);
+                // var white = new wn.Word("white");
+                // white.getAntonyms().then(function(synsetArray){
+                //   console.log(synsetArray);
+                // });
+
+              
                 arrayOfDMObjects.push({
                   headline : headline,
-                  score : sentimental.analyze(headline)['score'],
+                  score : score,
                   rude : wordfilter.blacklisted(headline)
                 });
                 
@@ -282,21 +313,21 @@
     // One by one, momentarily highlight a char in the headline
     //
     var dancingLights = function dancingLights() {
-      var i = 0,
+        var i = 0,
           elem = document.querySelector('h1');
 
-      setInterval(function() {
-        elem.children[i].className = 'highlight';
+        setInterval(function() {
 
-        var x = i;
-        setTimeout(function() { elem.children[x].className = ''; }, beatMs * 2);
+          elem.children[i].className = 'highlight';
+          var x = i;
+          setTimeout(function() { elem.children[x].className = ''; }, beatMs * 2);
+          i = ++i % headline.length;
 
-        i = ++i % headline.length;
-      }, beatMs);
+        }, beatMs);
     };
 
     getContent();
     
 
-}());
+});
 
